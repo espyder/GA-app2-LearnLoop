@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "LearnLoop (Expo web debug)",
+      "type": "msedge",
+      "request": "launch",
+      "url": "http://localhost:8082",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "learnloop: expo web"
+    }
+  ]
+}

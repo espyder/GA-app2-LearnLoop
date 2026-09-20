@@ -1,0 +1,34 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "learnloop: expo web",
+      "type": "shell",
+      "command": "npx.cmd expo start --web --port 8082",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "runOptions": {
+        "instanceLimit": 1,
+        "instancePolicy": "silent"
+      },
+      "problemMatcher": {
+        "owner": "expo",
+        "severity": "info",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^(.*Starting Expo.*|.*Starting development server.*|.*Metro.*)$",
+          "endsPattern": "^(.*Web Bundled.*|.*Local:.*|.*Welcome to Expo.*)$"
+        }
+      }
+    }
+  ]
+}
