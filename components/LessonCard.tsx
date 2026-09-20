@@ -32,15 +32,69 @@ export default function LessonCard({ lesson, progress, bookmarked, onPress }: Pr
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: '#FFFFFF', borderColor: '#D9E2EC', borderWidth: 1, borderRadius: 12, padding: 17, marginBottom: 12, shadowColor: '#0F172A', shadowOpacity: 0.05, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
-  pressed: { opacity: 0.78 },
-  topLine: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  topic: { color: '#2F6FED', fontSize: 11, fontWeight: '800', letterSpacing: 1 },
-  title: { color: '#0F172A', fontSize: 18, fontWeight: '800', marginTop: 9 },
-  summary: { color: '#64748B', fontSize: 13, lineHeight: 19, marginTop: 7 },
-  meta: { flexDirection: 'row', alignItems: 'center', marginTop: 13 },
-  metaText: { color: '#64748B', fontSize: 12, fontWeight: '600' },
-  dot: { color: '#CBD5E1', marginHorizontal: 7 },
-  progressRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 14 },
-  progress: { color: '#64748B', fontSize: 12, fontWeight: '700', width: 32 },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#D9E2EC',
+    borderRadius: 12,
+    borderWidth: 1,
+    elevation: 2,
+    marginBottom: 12,
+    padding: 17,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+  },
+  pressed: {
+    opacity: 0.78,
+  },
+  topLine: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  topic: {
+    color: '#2F6FED',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  title: {
+    color: '#0F172A',
+    fontSize: 18,
+    fontWeight: '800',
+    marginTop: 9,
+  },
+  summary: {
+    color: '#64748B',
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 7,
+  },
+  meta: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginTop: 13,
+  },
+  metaText: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  dot: {
+    color: '#CBD5E1',
+    marginHorizontal: 7,
+  },
+  progressRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 14,
+  },
+  progress: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '700',
+    width: 32,
+  },
 });

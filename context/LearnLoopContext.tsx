@@ -4,6 +4,8 @@ import { lessons } from '../data/lessons';
 import { midnightPalette, palette, ThemeMode } from '../constants/theme';
 
 // This is the app's saved user settings.
+// The theme is active and changes the color palette globally.
+// The other flags are stored in state, but are not yet connected to any real behavior.
 type Settings = {
   theme: ThemeMode;
   notifications: boolean;
@@ -45,16 +47,31 @@ export function LearnLoopProvider({ children }: PropsWithChildren) {
   const [settings, setSettings] = useState<Settings>({ theme: 'light', notifications: true, reducedMotion: true });
 
   // This object is shared with every screen that calls useLearnLoop().
-  const value = useMemo<LearnLoopContextValue>(() => ({
-    progress,
-    bookmarks,
-    settings,
-    colors: settings.theme === 'midnight' ? midnightPalette : palette,
-    completedCount: lessons.filter((lesson) => progress[lesson.id] >= 100).length,
-    toggleBookmark: (lessonId) => setBookmarks((current) => ({ ...current, [lessonId]: !current[lessonId] })),
-    setProgress: (lessonId, value) => setProgressState((current) => ({ ...current, [lessonId]: Math.min(100, Math.max(0, value)) })),
-    setSetting: (key, value) => setSettings((current) => ({ ...current, [key]: value })),
-  }), [bookmarks, progress, settings]);
+  const value = useMemo<LearnLoopContextValue>(
+    () => ({
+      progress,
+      bookmarks,
+      settings,
+      colors: settings.theme === 'midnight' ? midnightPalette : palette,
+      completedCount: lessons.filter((lesson) => progress[lesson.id] >= 100).length,
+      toggleBookmark: (lessonId) =>
+        setBookmarks((current) => ({
+          ...current,
+          [lessonId]: !current[lessonId],
+        })),
+      setProgress: (lessonId, value) =>
+        setProgressState((current) => ({
+          ...current,
+          [lessonId]: Math.min(100, Math.max(0, value)),
+        })),
+      setSetting: (key, value) =>
+        setSettings((current) => ({
+          ...current,
+          [key]: value,
+        })),
+    }),
+    [bookmarks, progress, settings],
+  );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }

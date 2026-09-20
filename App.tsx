@@ -1,8 +1,8 @@
 import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LearnLoopProvider, useLearnLoop } from './context/LearnLoopContext';
@@ -11,23 +11,25 @@ import LessonScreen from './screens/LessonScreen';
 import ProgressScreen from './screens/ProgressScreen';
 import SettingsScreen from './screens/SettingsScreen';
 
-// This type describes the screens inside the stack that lives under the Learn tab.
+// This type defines the screens inside the stack under the Learn tab.
+// The Lesson screen needs a lessonId so it knows which lesson to show.
 export type HomeStackParamList = {
   Home: undefined;
   Lesson: { lessonId: string };
 };
 
-// These are the main bottom tabs across the whole app.
+// These are the main app tabs shown across the bottom navigation.
 export type RootTabParamList = {
   Learn: undefined;
   Progress: undefined;
   Settings: undefined;
 };
 
-// A stack lets us move between Home and Lesson screens inside the Learn tab.
+// The Learn stack holds the Home and Lesson screens, so the user can drill into a lesson.
 const Stack = createNativeStackNavigator<HomeStackParamList>();
 const Tabs = createBottomTabNavigator<RootTabParamList>();
 
+// This nested stack keeps the lesson detail flow inside the Learn tab.
 function LearnStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -37,6 +39,8 @@ function LearnStack() {
   );
 }
 
+// This is the main navigation shell for the app.
+// It reads the current theme and settings from the shared context so the UI matches the user's selections.
 function AppNavigation() {
   const { colors, settings } = useLearnLoop();
 
@@ -54,15 +58,23 @@ function AppNavigation() {
             paddingBottom: 10,
             paddingTop: 8,
           },
-          tabBarLabelStyle: { fontSize: 12, fontWeight: '700' },
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '700',
+          },
           tabBarIcon: ({ color, size, focused }) => {
-            // Pick a different icon depending on which tab is selected.
             const iconName =
               route.name === 'Learn'
-                ? focused ? 'book' : 'book-outline'
+                ? focused
+                  ? 'book'
+                  : 'book-outline'
                 : route.name === 'Progress'
-                  ? focused ? 'trending-up' : 'trending-up-outline'
-                  : focused ? 'settings' : 'settings-outline';
+                  ? focused
+                    ? 'trending-up'
+                    : 'trending-up-outline'
+                  : focused
+                    ? 'settings'
+                    : 'settings-outline';
 
             return <Ionicons name={iconName} color={color} size={size} />;
           },
@@ -76,6 +88,8 @@ function AppNavigation() {
   );
 }
 
+// App bootstraps the providers and navigation.
+// The context provider wraps the app so every screen can access shared progress, bookmarks, and settings.
 export default function App() {
   return (
     <SafeAreaProvider>

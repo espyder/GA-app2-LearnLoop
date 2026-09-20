@@ -17,7 +17,8 @@ export default function SettingsScreen() {
 
         <Text style={[styles.section, { color: colors.text }]}>Preferences</Text>
         <View style={[styles.panel, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          {/* Each toggle updates one value in the shared app settings object. */}
+          {/* These toggles update the saved settings state. */}
+          {/* The theme setting is the only one that currently changes app behavior. */}
           <SettingRow
             icon="notifications-outline"
             title="Study reminders"
@@ -106,5 +107,92 @@ function SettingRow({
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 }, content: { maxWidth: 760, alignSelf: 'center', padding: 20, width: '100%', paddingBottom: 40 }, eyebrow: { fontSize: 11, fontWeight: '800', letterSpacing: 1.1 }, title: { fontSize: 32, fontWeight: '800', marginTop: 9 }, subtitle: { fontSize: 15, lineHeight: 22, marginTop: 9 }, section: { fontSize: 18, fontWeight: '800', marginBottom: 12, marginTop: 30 }, panel: { borderRadius: 12, borderWidth: 1, paddingHorizontal: 16 }, row: { alignItems: 'center', flexDirection: 'row', minHeight: 77 }, rowCopy: { flex: 1, marginHorizontal: 13 }, preferenceTitle: { fontSize: 14, fontWeight: '800' }, rowDescription: { fontSize: 12, lineHeight: 17, marginTop: 3 }, divider: { height: 1 }, themeOptions: { flexDirection: 'row', gap: 9, marginBottom: 16, marginTop: 13 }, themeOption: { borderRadius: 8, borderWidth: 1, fontSize: 13, fontWeight: '700', overflow: 'hidden', paddingHorizontal: 16, paddingVertical: 10 }, offline: { alignItems: 'center', borderRadius: 12, flexDirection: 'row', marginTop: 24, padding: 16 }, offlineCopy: { flex: 1, marginLeft: 12 }, offlineText: { fontSize: 12, lineHeight: 18, marginTop: 4 },
+  safe: {
+    flex: 1,
+  },
+  content: {
+    maxWidth: 760,
+    alignSelf: 'center',
+    padding: 20,
+    width: '100%',
+    paddingBottom: 40,
+  },
+  eyebrow: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.1,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: '800',
+    marginTop: 9,
+  },
+  subtitle: {
+    fontSize: 15,
+    lineHeight: 22,
+    marginTop: 9,
+  },
+  section: {
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 12,
+    marginTop: 30,
+  },
+  panel: {
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+  },
+  row: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    minHeight: 77,
+  },
+  rowCopy: {
+    flex: 1,
+    marginHorizontal: 13,
+  },
+  preferenceTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  rowDescription: {
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 3,
+  },
+  divider: {
+    height: 1,
+  },
+  themeOptions: {
+    flexDirection: 'row',
+    gap: 9,
+    marginBottom: 16,
+    marginTop: 13,
+  },
+  themeOption: {
+    borderRadius: 8,
+    borderWidth: 1,
+    fontSize: 13,
+    fontWeight: '700',
+    overflow: 'hidden',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  offline: {
+    alignItems: 'center',
+    borderRadius: 12,
+    flexDirection: 'row',
+    marginTop: 24,
+    padding: 16,
+  },
+  offlineCopy: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  offlineText: {
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 4,
+  },
 });

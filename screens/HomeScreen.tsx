@@ -19,7 +19,8 @@ export default function HomeScreen({ navigation }: Props) {
   const contentWidth = Math.min(width - 32, 760);
 
   // Pick the next lesson that is started but not finished.
-  const activeLesson = lessons.find((lesson) => progress[lesson.id] > 0 && progress[lesson.id] < 100) ?? lessons[0];
+  const activeLesson =
+    lessons.find((lesson) => progress[lesson.id] > 0 && progress[lesson.id] < 100) ?? lessons[0];
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.surface }]} edges={['top']}>
@@ -30,6 +31,7 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={[styles.eyebrow, { color: colors.primary }]}>MONDAY, SEPTEMBER 20</Text>
             <Text style={[styles.heading, { color: colors.text }]}>Keep the loop going.</Text>
           </View>
+
           <View style={[styles.streak, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Ionicons name="flame" color="#F59E0B" size={18} />
             {/* Placeholder streak value: not calculated from user activity yet. */}
@@ -41,8 +43,11 @@ export default function HomeScreen({ navigation }: Props) {
           <View style={styles.heroCopy}>
             <Text style={styles.heroLabel}>UP NEXT</Text>
             <Text style={styles.heroTitle}>{activeLesson.title}</Text>
-            <Text style={styles.heroMeta}>{activeLesson.duration} · {progress[activeLesson.id] ?? 0}% complete</Text>
+            <Text style={styles.heroMeta}>
+              {activeLesson.duration} · {progress[activeLesson.id] ?? 0}% complete
+            </Text>
           </View>
+
           <View style={styles.playButton}>
             <Ionicons name="play" color={colors.primary} size={20} />
           </View>
@@ -53,6 +58,7 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={[styles.summaryLabel, { color: colors.muted }]}>Completed</Text>
             <Text style={[styles.summaryValue, { color: colors.text }]}>{completedCount}</Text>
           </View>
+
           <View style={[styles.summaryCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={[styles.summaryLabel, { color: colors.muted }]}>Lessons</Text>
             <Text style={[styles.summaryValue, { color: colors.text }]}>{lessons.length}</Text>
@@ -61,11 +67,12 @@ export default function HomeScreen({ navigation }: Props) {
 
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Your learning path</Text>
-          <Text style={[styles.count, { color: colors.muted }]}>{completedCount}/{lessons.length} complete</Text>
+          <Text style={[styles.count, { color: colors.muted }]}>
+            {completedCount}/{lessons.length} complete
+          </Text>
         </View>
 
         {lessons.map((lesson) => (
-          // Each LessonCard is one item in the list of learning content.
           <LessonCard
             key={lesson.id}
             lesson={lesson}
