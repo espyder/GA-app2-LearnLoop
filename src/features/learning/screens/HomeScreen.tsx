@@ -12,6 +12,8 @@ import LessonCard from '../components/LessonCard';
 // This type gives navigation the exact routes and parameters available here.
 type Props = NativeStackScreenProps<HomeStackParamList, 'Home'>;
 
+// Builds the learning dashboard from context data and uses its typed navigation
+// prop to open the selected lesson.
 export default function HomeScreen({ navigation }: Props) {
   // Read shared app state like progress and theme colors.
   const { colors, lessons, progress, bookmarks, completedCount } = useLearnLoop();
@@ -27,7 +29,8 @@ export default function HomeScreen({ navigation }: Props) {
     .format(new Date())
     .toUpperCase();
 
-  // Pick the next lesson that is started but not finished.
+  // Pick the next lesson that is started but not finished. find calls this
+  // predicate for each lesson and stops at the first true result.
   const activeLesson =
     lessons.find((lesson) => progress[lesson.id] > 0 && progress[lesson.id] < 100) ?? lessons[0];
 
@@ -91,6 +94,8 @@ export default function HomeScreen({ navigation }: Props) {
           </Text>
         </View>
 
+        {/* map calls this render callback once per lesson. The onPress callback
+            captures that lesson's ID and passes it to the Lesson route. */}
         {lessons.map((lesson) => (
           <LessonCard
             key={lesson.id}

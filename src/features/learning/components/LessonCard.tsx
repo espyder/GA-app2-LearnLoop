@@ -10,8 +10,12 @@ import ProgressBar from './ProgressBar';
 // component is rendered.
 type Props = { lesson: Lesson; progress: number; bookmarked: boolean; onPress: () => void };
 
+// Renders one lesson summary. The parent provides onPress so this reusable card
+// does not need to know which navigator or screen owns it.
 export default function LessonCard({ lesson, progress, bookmarked, onPress }: Props) {
   return (
+    // React Native calls this style function with the current pressed state.
+    // The returned array adds reduced opacity only while the card is pressed.
     <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
       <View style={styles.topLine}>
         <Text style={styles.topic}>{lesson.topic.toUpperCase()}</Text>

@@ -21,27 +21,8 @@ export type LearnLoopSnapshot = {
   settings: Settings;
 };
 
-// Restores the saved session or creates an anonymous user on first launch.
-export async function getOrCreateUserId() {
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError) throw sessionError;
-
-  let session = sessionData.session;
-  if (!session) {
-    const { data: anonymousData, error: anonymousError } =
-      await supabase.auth.signInAnonymously();
-    if (anonymousError) throw anonymousError;
-    session = anonymousData.session;
-  }
-
-  if (!session) {
-    throw new Error('Supabase did not return a user session.');
-  }
-
-  return session.user.id;
-}
-
 // Loads the database rows and converts them into shapes that the React UI uses.
+// userId selects private rows; defaultSettings initializes a first-time user.
 export async function loadLearnLoopSnapshot(
   userId: string,
   defaultSettings: Settings,
@@ -97,6 +78,8 @@ export async function loadLearnLoopSnapshot(
   }
 
   return {
+    // map creates a new array. Destructuring removes the database-only
+    // sort_order column before each lesson reaches the UI.
     lessons: lessonRows.map(({ sort_order: _sortOrder, ...lesson }) => lesson),
     progress,
     bookmarks,
@@ -108,6 +91,8 @@ export async function loadLearnLoopSnapshot(
   };
 }
 
+// Persists the complete progress-and-bookmark state for one lesson. Keeping
+// both values together matches the shape of the user_lesson_state table.
 export async function saveLessonState(
   userId: string,
   lessonId: string,
@@ -128,6 +113,8 @@ export async function saveLessonState(
   if (error) throw error;
 }
 
+// Persists all preferences for one user. This async function resolves after a
+// successful write and throws when Supabase returns an error.
 export async function saveSettings(userId: string, settings: Settings) {
   const { error } = await supabase.from('user_preferences').upsert(
     {

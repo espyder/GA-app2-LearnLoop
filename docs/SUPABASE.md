@@ -11,12 +11,13 @@ Last updated: 2026-10-31
 - The Supabase project has been created.
 - `lessons`, `user_lesson_state`, and `user_preferences` have been created.
 - Row Level Security (RLS) and the initial policies have been applied.
-- The three original LearnLoop lessons have been seeded.
-- Anonymous authentication has been enabled.
+- The catalog contains six seeded lessons with six checkpoints each.
+- Email/password authentication is implemented with registration and login.
 - The Expo client dependencies have been installed.
 - `src/lib/supabase.ts` initializes the client and persists its session locally.
 - `.env.local` contains the project URL and publishable key and is ignored by Git.
-- `LearnLoopProvider` restores or creates an anonymous session and loads all app
+- `AuthProvider` restores the persisted session and listens for auth changes.
+- `LearnLoopProvider` mounts only for a signed-in account and loads that user's
   data from Supabase.
 - Progress, bookmarks, and preferences use optimistic updates followed by
   RLS-protected database upserts.
@@ -33,13 +34,10 @@ Last updated: 2026-10-31
 | Theme and preferences | `public.user_preferences` | Current user only |
 | Identity and sessions | Supabase Auth | Managed by Supabase |
 
-The app uses anonymous Supabase users initially. This provides a real user ID
-without requiring a login screen. Anonymous users use the `authenticated`
-Postgres role, so user-owned tables must always check `auth.uid()` in RLS.
-
-Anonymous sessions are installation-specific. If the user clears application
-data, signs out, or changes device, they cannot recover the account unless an
-email, phone, or OAuth identity is linked later.
+The app uses recoverable email/password accounts. `AuthProvider` restores the
+locally persisted session, while `AuthScreen` provides validated registration
+and login forms. Once a session exists, `session.user.id` is passed into
+`LearnLoopProvider` for all user-owned queries.
 
 ## Database schema
 
@@ -65,6 +63,12 @@ The client should query lessons in this order:
 ```ts
 supabase.from('lessons').select('*').order('sort_order');
 ```
+
+Each seeded lesson contains five takeaway checkpoints and one final practice
+task. Completing one checkpoint stores approximately 17 percent more progress
+in `user_lesson_state`. Run
+`supabase/seed_lessons.sql` in the dashboard SQL Editor to upsert all six lessons
+without changing existing lesson IDs or breaking saved user state.
 
 ### `public.user_lesson_state`
 
@@ -125,17 +129,18 @@ RLS. The Expo app must use only the publishable key.
 
 At application startup:
 
-1. Call `supabase.auth.getSession()`.
-2. If a session exists, reuse it.
-3. Otherwise call `supabase.auth.signInAnonymously()`.
-4. Use `session.user.id` for user-owned reads and writes.
-5. Load lesson state and preferences after authentication completes.
+1. `AuthProvider` calls `supabase.auth.getSession()`.
+2. If no session exists, `AuthScreen` displays registration and login.
+3. Registration uses `supabase.auth.signUp({ email, password })`.
+4. Login uses `supabase.auth.signInWithPassword({ email, password })`.
+5. `onAuthStateChange` publishes the new session to the app.
+6. `AuthGate` mounts `LearnLoopProvider` with `session.user.id`.
+7. The provider loads lesson state and preferences inside `useEffect`.
+8. Logout calls `supabase.auth.signOut()` and returns to `AuthScreen`.
 
-Future account support should link an identity to the existing anonymous user
-instead of creating an unrelated user, so existing progress is retained.
-
-Anonymous authentication can be abused to create many accounts. Before public
-release, configure CAPTCHA or Turnstile and review Supabase Auth rate limits.
+If Confirm Email is enabled in the Supabase dashboard, registration creates the
+account without an immediate session. The form tells the user to confirm the
+email and then sign in.
 
 ## Expo client configuration
 
@@ -166,19 +171,21 @@ npx expo start --clear
 
 ## Client integration
 
-`src/state/LearnLoopProvider.tsx` remains the UI-facing state layer. Database
-and authentication operations are isolated in
+`src/state/AuthProvider.tsx` owns session state. Authentication operations are in
+`src/services/auth.service.ts`. `src/state/LearnLoopProvider.tsx` remains the
+UI-facing learning-data layer, and database operations live in
 `src/services/learnLoop.service.ts`. Together they currently:
 
-1. Establishes or restores the anonymous session.
-2. Fetches lessons ordered by `sort_order`.
-3. Fetches the current user's lesson state and preferences.
-4. Creates the default preferences row when a new user does not have one.
-5. Exposes lessons, user state, loading, errors, and retry behavior.
-6. Keeps progress, bookmark, and setting changes optimistic in React state.
-7. Persists each change with a Supabase upsert.
-8. Rolls back an optimistic value when its database write fails.
-9. Reloads authoritative server data when the user chooses `Try again`.
+1. Restore a persisted email/password session.
+2. Display the validated auth form while signed out.
+3. Fetch lessons ordered by `sort_order` after login.
+4. Fetch the current user's lesson state and preferences.
+5. Create the default preferences row when a new user does not have one.
+6. Expose lessons, user state, loading, errors, and retry behavior.
+7. Advance progress one lesson checkpoint at a time.
+8. Keep progress, bookmark, and setting changes optimistic in React state.
+9. Persist each change with a Supabase upsert and roll back failed writes.
+10. End the session from Settings and return to the auth form.
 
 The screens do not import lesson content directly. The shared `Lesson` type
 lives beside the learning feature in
@@ -200,8 +207,12 @@ whether the newest server value, newest device value, or a merge wins.
 
 ## Verification checklist
 
-- A new installation receives an anonymous authenticated session.
-- Signed-out public access can read `lessons` only.
+- Registration rejects empty fields, invalid email, short passwords, and
+  mismatched password confirmation before making a request.
+- A new account can register, confirm email when required, and log in.
+- A saved session is restored after restarting the app.
+- Logging out returns the user to the authentication screen.
+- Signed-out users cannot enter the private app navigator.
 - A user can read and upsert their own lesson state.
 - A user cannot read or write another user's lesson state.
 - A user can read and upsert their own preferences.
@@ -210,11 +221,19 @@ whether the newest server value, newest device value, or a merge wins.
 - Theme and settings remain after restarting the app.
 - Missing network connectivity produces a useful state instead of a crash.
 - No service-role key exists in the repository or application bundle.
+- Each seeded lesson advances through six persisted checkpoints.
 
 ## Change log
 
 ### 2026-10-31
 
+- Replaced automatic anonymous authentication with email/password registration,
+  login, persistent sessions, and logout.
+- Added field-level validation to the authentication form.
+- Added `AuthProvider` and an authentication gate before private navigation.
+- Changed lesson completion from a binary toggle to checkpoint-based progress.
+- Added a repeatable seed script with six expanded lessons.
+- Applied the expanded lesson seed to the hosted Supabase project.
 - Reorganized application code under `src/` by responsibility and feature.
 - Separated navigation from provider composition.
 - Extracted authentication and Supabase CRUD from React state into

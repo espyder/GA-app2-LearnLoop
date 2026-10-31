@@ -17,7 +17,7 @@ if (!supabaseUrl || !supabasePublishableKey) {
 
 export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
   auth: {
-    // Expo SQLite provides persistent localStorage so the anonymous session
+    // Expo SQLite provides persistent localStorage so the signed-in session
     // survives an application restart.
     storage: localStorage,
     autoRefreshToken: true,

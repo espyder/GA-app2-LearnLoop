@@ -6,11 +6,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useLearnLoop } from '../../../state/LearnLoopProvider';
 
+// Derives statistics from shared state and renders a read-only progress report.
 export default function ProgressScreen() {
   // Read progress information from the shared context so this screen reflects the user's study state.
   const { colors, lessons, progress, bookmarks, completedCount } = useLearnLoop();
 
-  // Find lessons that started but are not finished yet.
+  // Find lessons that started but are not finished yet. filter calls this
+  // predicate for every lesson and keeps only the ones that return true.
   const activeLessons = lessons.filter(
     (lesson) => (progress[lesson.id] ?? 0) > 0 && (progress[lesson.id] ?? 0) < 100,
   );
@@ -48,6 +50,8 @@ export default function ProgressScreen() {
         <View style={[styles.panel, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[styles.panelTitle, { color: colors.text }]}>Current momentum</Text>
 
+          {/* map calls this render callback once per lesson. Its local value
+              keeps the percentage lookup readable throughout that row. */}
           {lessons.map((lesson) => {
             const value = progress[lesson.id] ?? 0;
 
@@ -78,7 +82,8 @@ export default function ProgressScreen() {
   );
 }
 
-// Small card used to display a single progress stat.
+// Small card used to display a single progress stat. Its props let the parent
+// reuse the same layout for completed, active, and saved totals.
 function StatCard({
   label,
   value,

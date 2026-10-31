@@ -33,6 +33,9 @@ yarn-error.*
 # local env files
 .env*.local
 
+# private assignment handoff (contains the publishable project configuration)
+/submission/
+
 # typescript
 *.tsbuildinfo
 

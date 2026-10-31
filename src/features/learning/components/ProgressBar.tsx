@@ -4,6 +4,8 @@ import { View } from 'react-native';
 
 import { palette } from '../../../theme/theme';
 
+// Converts the value prop into a clamped percentage width. A caller may supply
+// a color, while the default parameter uses the app's primary color.
 export default function ProgressBar({ value, color = palette.primary }: { value: number; color?: string }) {
   return (
     <View style={{ height: 7, borderRadius: 4, backgroundColor: '#E6ECF4', overflow: 'hidden' }}>

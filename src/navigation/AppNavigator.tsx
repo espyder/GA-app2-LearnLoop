@@ -27,6 +27,8 @@ function LearnStack() {
   );
 }
 
+// Chooses between startup feedback and the main navigator. Once data is ready,
+// it also applies the saved theme to React Navigation.
 export default function AppNavigator() {
   const { colors, settings, loading, error, retry } = useLearnLoop();
 
@@ -55,6 +57,7 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer theme={settings.theme === 'midnight' ? DarkTheme : DefaultTheme}>
+      {/* screenOptions runs once for each tab and receives that tab's route. */}
       <Tabs.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
@@ -71,6 +74,8 @@ export default function AppNavigator() {
             fontSize: 12,
             fontWeight: '700',
           },
+          // React Navigation passes the icon's current color, size, and focus
+          // state; this callback returns the matching Ionicons element.
           tabBarIcon: ({ color, size, focused }) => {
             const iconName =
               route.name === 'Learn'

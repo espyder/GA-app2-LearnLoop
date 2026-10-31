@@ -13,7 +13,6 @@ import {
 
 import type { Lesson } from '../features/learning/lesson.types';
 import {
-  getOrCreateUserId,
   loadLearnLoopSnapshot,
   saveLessonState,
   saveSettings,
@@ -54,7 +53,12 @@ function getErrorMessage(error: unknown) {
 // a component is accidentally rendered outside LearnLoopProvider.
 const Context = createContext<LearnLoopContextValue | undefined>(undefined);
 
-export function LearnLoopProvider({ children }: PropsWithChildren) {
+// Owns the app's shared state, loads its initial Supabase snapshot, and exposes
+// actions that keep the interface and database synchronized.
+export function LearnLoopProvider({
+  children,
+  userId,
+}: PropsWithChildren<{ userId: string }>) {
   // useState stores values that affect rendering. Calling a setter schedules a
   // new render so every subscribed screen receives the latest value.
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -71,20 +75,23 @@ export function LearnLoopProvider({ children }: PropsWithChildren) {
   // Refs hold mutable values without causing a render. Async callbacks can read
   // .current and receive the newest value instead of a value captured by an old
   // render (a problem commonly called a "stale closure").
-  const userIdRef = useRef<string | null>(null);
+  const userIdRef = useRef<string | null>(userId);
   const progressRef = useRef(progress);
   const bookmarksRef = useRef(bookmarks);
   const settingsRef = useRef(settings);
 
-  // Keep each ref synchronized with its matching piece of React state.
+  // This effect callback runs after progress changes and copies the newest
+  // render value into the ref used by asynchronous actions.
   useEffect(() => {
     progressRef.current = progress;
   }, [progress]);
 
+  // This effect callback performs the same synchronization for bookmarks.
   useEffect(() => {
     bookmarksRef.current = bookmarks;
   }, [bookmarks]);
 
+  // This effect callback performs the same synchronization for settings.
   useEffect(() => {
     settingsRef.current = settings;
   }, [settings]);
@@ -96,14 +103,15 @@ export function LearnLoopProvider({ children }: PropsWithChildren) {
     // prevents us from updating state on a component that no longer exists.
     let active = true;
 
+    // Runs the authentication and initial database-loading sequence. It is an
+    // inner async function because a useEffect callback must not return a Promise.
     async function loadData() {
       setLoading(true);
       setError(null);
 
       try {
-        // The service owns authentication and database details. The provider
-        // receives application-friendly values and puts them into React state.
-        const userId = await getOrCreateUserId();
+        // AuthGate supplies the authenticated account ID. The service receives
+        // it for RLS-protected queries and returns application-friendly values.
         userIdRef.current = userId;
         const snapshot = await loadLearnLoopSnapshot(userId, defaultSettings);
 
@@ -133,15 +141,18 @@ export function LearnLoopProvider({ children }: PropsWithChildren) {
     // intentionally starts the Promise while showing that it is not awaited here.
     void loadData();
 
-    // React calls this cleanup before the effect reruns or the provider unmounts.
+    // React calls this cleanup function before the effect reruns or the provider
+    // unmounts. It tells the pending load to ignore a late response.
     return () => {
       active = false;
     };
-  }, [reloadVersion]);
+  }, [reloadVersion, userId]);
 
   // This helper handles the database part shared by progress and bookmarks.
   // useCallback keeps the function identity stable between renders.
   const persistLessonState = useCallback(
+    // Returns true after a successful save and false after handling a failure,
+    // allowing the caller to decide whether an optimistic update must roll back.
     async (lessonId: string, changes: { progress?: number; bookmarked?: boolean }) => {
       const userId = userIdRef.current;
       if (!userId) {
@@ -167,6 +178,8 @@ export function LearnLoopProvider({ children }: PropsWithChildren) {
     [],
   );
 
+  // Creates a stable action that immediately flips one bookmark and then asks
+  // Supabase to persist it.
   const toggleBookmark = useCallback(
     (lessonId: string) => {
       // Save the old value so it can be restored if the network request fails.
@@ -180,6 +193,8 @@ export function LearnLoopProvider({ children }: PropsWithChildren) {
       // This is an optimistic update: the UI changes immediately instead of
       // waiting for the network, which makes the app feel responsive.
       void persistLessonState(lessonId, { bookmarked: next }).then((saved) => {
+        // This Promise callback receives the helper's success boolean after the
+        // database request settles.
         // Only roll back if this value is still the one we attempted to save.
         // Without the check, a slow failed request could overwrite a newer click.
         if (!saved && bookmarksRef.current[lessonId] === next) {
@@ -192,6 +207,7 @@ export function LearnLoopProvider({ children }: PropsWithChildren) {
     [persistLessonState],
   );
 
+  // Creates a stable action that updates one lesson percentage optimistically.
   const setProgress = useCallback(
     (lessonId: string, value: number) => {
       const previous = progressRef.current[lessonId] ?? 0;
@@ -205,6 +221,8 @@ export function LearnLoopProvider({ children }: PropsWithChildren) {
       // Progress uses the same optimistic-update and guarded-rollback pattern as
       // bookmarks.
       void persistLessonState(lessonId, { progress: next }).then((saved) => {
+        // This Promise callback restores the previous percentage only when the
+        // save failed and no newer update has replaced this one.
         if (!saved && progressRef.current[lessonId] === next) {
           const rolledBack = { ...progressRef.current, [lessonId]: previous };
           progressRef.current = rolledBack;
@@ -215,6 +233,7 @@ export function LearnLoopProvider({ children }: PropsWithChildren) {
     [persistLessonState],
   );
 
+  // Creates a type-safe action for changing and saving any Settings property.
   const setSetting = useCallback(
     // The generic connects the key and value types. For example, "theme" only
     // accepts ThemeMode, while "notifications" only accepts a boolean.
@@ -231,7 +250,11 @@ export function LearnLoopProvider({ children }: PropsWithChildren) {
       setSettings(next);
 
       void saveSettings(userId, next)
-        .then(() => setError(null))
+        // This success callback clears any older write error.
+        .then(() => {
+          setError(null);
+        })
+        // This failure callback displays the error and conditionally rolls back.
         .catch((writeError: unknown) => {
           setError(getErrorMessage(writeError));
 
@@ -246,10 +269,18 @@ export function LearnLoopProvider({ children }: PropsWithChildren) {
     [],
   );
 
+  // Starts the loading effect again. React passes the latest state value into
+  // the functional setter callback, avoiding dependence on an older render.
+  const retry = useCallback(() => {
+    setReloadVersion((current) => current + 1);
+  }, []);
+
   // useMemo avoids creating a brand-new context object on unrelated renders.
   // Context consumers rerender when this value's identity changes, so stable
   // identities help avoid unnecessary screen work.
   const value = useMemo<LearnLoopContextValue>(
+    // This factory builds the public object consumed by screens. React reruns it
+    // only when one of the dependencies below changes.
     () => ({
       lessons,
       progress,
@@ -258,15 +289,18 @@ export function LearnLoopProvider({ children }: PropsWithChildren) {
       colors: settings.theme === 'midnight' ? midnightPalette : palette,
       // completedCount is derived data: it can be calculated from existing state,
       // so storing another independent state value would risk inconsistencies.
-      completedCount: lessons.filter((lesson) => progress[lesson.id] >= 100).length,
+      completedCount: lessons.filter(
+        // filter calls this predicate once per lesson and keeps completed ones.
+        (lesson) => progress[lesson.id] >= 100,
+      ).length,
       loading,
       error,
-      retry: () => setReloadVersion((current) => current + 1),
+      retry,
       toggleBookmark,
       setProgress,
       setSetting,
     }),
-    [bookmarks, error, lessons, loading, progress, setProgress, setSetting, settings, toggleBookmark],
+    [bookmarks, error, lessons, loading, progress, retry, setProgress, setSetting, settings, toggleBookmark],
   );
 
   // Every descendant can now access value without passing props through each

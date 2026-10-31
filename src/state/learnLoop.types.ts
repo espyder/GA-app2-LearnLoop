@@ -19,8 +19,12 @@ export type LearnLoopContextValue = {
   completedCount: number;
   loading: boolean;
   error: string | null;
+  // Requests another complete authentication-and-data-loading attempt.
   retry: () => void;
+  // Flips one lesson between bookmarked and not bookmarked.
   toggleBookmark: (lessonId: string) => void;
+  // Replaces one lesson's percentage; the provider clamps it to 0-100.
   setProgress: (lessonId: string, value: number) => void;
+  // The generic key determines the required value type for each setting.
   setSetting: <Key extends keyof Settings>(key: Key, value: Settings[Key]) => void;
 };
