@@ -1,10 +1,13 @@
+// ProgressBar turns a numeric percentage into a small visual indicator. The
+// optional color prop makes it reusable while preserving a theme default.
 import { View } from 'react-native';
 
-import { palette } from '../constants/theme';
+import { palette } from '../../../theme/theme';
 
 export default function ProgressBar({ value, color = palette.primary }: { value: number; color?: string }) {
   return (
     <View style={{ height: 7, borderRadius: 4, backgroundColor: '#E6ECF4', overflow: 'hidden' }}>
+      {/* Clamp the width to 0-100 so invalid input cannot overflow the track. */}
       <View style={{ width: `${Math.min(100, Math.max(0, value))}%`, height: '100%', backgroundColor: color, borderRadius: 4 }} />
     </View>
   );

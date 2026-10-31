@@ -1,13 +1,14 @@
+// ProgressScreen calculates summary statistics from shared state. These values
+// are derived during rendering instead of being stored as duplicate state.
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { lessons } from '../data/lessons';
-import { useLearnLoop } from '../context/LearnLoopContext';
+import { useLearnLoop } from '../../../state/LearnLoopProvider';
 
 export default function ProgressScreen() {
   // Read progress information from the shared context so this screen reflects the user's study state.
-  const { colors, progress, bookmarks, completedCount } = useLearnLoop();
+  const { colors, lessons, progress, bookmarks, completedCount } = useLearnLoop();
 
   // Find lessons that started but are not finished yet.
   const activeLessons = lessons.filter(
@@ -87,7 +88,7 @@ function StatCard({
   label: string;
   value: string;
   accent: string;
-  colors: typeof import('../constants/theme').palette;
+  colors: typeof import('../../../theme/theme').palette;
 }) {
   return (
     <View style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>

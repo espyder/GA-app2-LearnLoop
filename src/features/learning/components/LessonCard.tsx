@@ -1,9 +1,13 @@
+// LessonCard is a presentational component: it receives all data and behavior
+// through props and does not query Supabase or own application state itself.
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Lesson } from '../data/lessons';
+import type { Lesson } from '../lesson.types';
 import ProgressBar from './ProgressBar';
 
+// Describing props with a type lets TypeScript check every place the reusable
+// component is rendered.
 type Props = { lesson: Lesson; progress: number; bookmarked: boolean; onPress: () => void };
 
 export default function LessonCard({ lesson, progress, bookmarked, onPress }: Props) {

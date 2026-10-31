@@ -1,41 +1,60 @@
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+// HomeScreen summarizes the learner's current state and renders the lesson
+// collection. Navigation is its only responsibility outside presentation.
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { HomeStackParamList } from '../App';
-import { lessons } from '../data/lessons';
-import { useLearnLoop } from '../context/LearnLoopContext';
+import type { HomeStackParamList } from '../../../navigation/navigation.types';
+import { useLearnLoop } from '../../../state/LearnLoopProvider';
 import LessonCard from '../components/LessonCard';
 
+// This type gives navigation the exact routes and parameters available here.
 type Props = NativeStackScreenProps<HomeStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
   // Read shared app state like progress and theme colors.
-  const { colors, progress, bookmarks, completedCount } = useLearnLoop();
+  const { colors, lessons, progress, bookmarks, completedCount } = useLearnLoop();
 
   // Use screen width to keep the layout readable on different devices.
   const { width } = useWindowDimensions();
   const contentWidth = Math.min(width - 32, 760);
+  const today = new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  })
+    .format(new Date())
+    .toUpperCase();
 
   // Pick the next lesson that is started but not finished.
   const activeLesson =
     lessons.find((lesson) => progress[lesson.id] > 0 && progress[lesson.id] < 100) ?? lessons[0];
+
+  if (!activeLesson) {
+    return (
+      <SafeAreaView style={[styles.safe, { backgroundColor: colors.surface }]} edges={['top']}>
+        <View style={styles.empty}>
+          <Ionicons name="book-outline" color={colors.primary} size={32} />
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>No lessons available</Text>
+          <Text style={[styles.emptyText, { color: colors.muted }]}>Add a lesson in Supabase to begin learning.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.surface }]} edges={['top']}>
       <ScrollView contentContainerStyle={[styles.content, { width: contentWidth, alignSelf: 'center' }]}>
         <View style={styles.header}>
           <View style={styles.headerCopy}>
-            {/* Hardcoded date text: this is placeholder UI, not a live calendar value. */}
-            <Text style={[styles.eyebrow, { color: colors.primary }]}>MONDAY, SEPTEMBER 20</Text>
+            <Text style={[styles.eyebrow, { color: colors.primary }]}>{today}</Text>
             <Text style={[styles.heading, { color: colors.text }]}>Keep the loop going.</Text>
           </View>
 
           <View style={[styles.streak, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Ionicons name="flame" color="#F59E0B" size={18} />
-            {/* Placeholder streak value: not calculated from user activity yet. */}
-            <Text style={[styles.streakText, { color: colors.text }]}>4 day streak</Text>
+            <Ionicons name="cloud-done-outline" color={colors.primary} size={18} />
+            <Text style={[styles.streakText, { color: colors.text }]}>Synced</Text>
           </View>
         </View>
 
@@ -150,4 +169,6 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   sectionTitle: { fontSize: 19, fontWeight: '800' },
   count: { fontSize: 12, fontWeight: '700' },
+  empty: { alignItems: 'center', flex: 1, justifyContent: 'center', padding: 24 },
+  emptyText: { fontSize: 13, marginTop: 8, textAlign: 'center' },
 });

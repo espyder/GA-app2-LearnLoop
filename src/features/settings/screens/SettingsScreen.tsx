@@ -1,8 +1,10 @@
+// SettingsScreen renders controlled inputs: each switch reads its value from
+// context and sends changes back through setSetting for Supabase persistence.
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useLearnLoop } from '../context/LearnLoopContext';
+import { useLearnLoop } from '../../../state/LearnLoopProvider';
 
 export default function SettingsScreen() {
   // Pull the shared settings and theme values from the app context.
@@ -62,10 +64,10 @@ export default function SettingsScreen() {
         </View>
 
         <View style={[styles.offline, { backgroundColor: colors.primarySoft }]}>
-          <Ionicons name="cloud-offline-outline" size={22} color={colors.primary} />
+          <Ionicons name="cloud-done-outline" size={22} color={colors.primary} />
           <View style={styles.offlineCopy}>
-            <Text style={[styles.preferenceTitle, { color: colors.text }]}>Always available offline</Text>
-            <Text style={[styles.offlineText, { color: colors.muted }]}>Your lessons and progress live on this device.</Text>
+            <Text style={[styles.preferenceTitle, { color: colors.text }]}>Synced with Supabase</Text>
+            <Text style={[styles.offlineText, { color: colors.muted }]}>Your progress and preferences are saved securely online.</Text>
           </View>
         </View>
       </ScrollView>
@@ -87,7 +89,7 @@ function SettingRow({
   description: string;
   value: boolean;
   onValueChange: (value: boolean) => void;
-  colors: typeof import('../constants/theme').palette;
+  colors: typeof import('../../../theme/theme').palette;
 }) {
   return (
     <View style={styles.row}>

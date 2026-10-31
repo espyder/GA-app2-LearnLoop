@@ -1,6 +1,8 @@
 {
     "chat.editor.preferCopilotHarness": false,
     "chat.defaultToCopilotHarness": false,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
     "files.exclude": {
         "**/node_modules": true
     }

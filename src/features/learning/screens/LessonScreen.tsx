@@ -1,23 +1,39 @@
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+// LessonScreen reads a lesson ID from the navigation route, finds that lesson
+// in shared state, and exposes bookmark and completion actions to the learner.
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { HomeStackParamList } from '../App';
-import { lessons } from '../data/lessons';
-import { useLearnLoop } from '../context/LearnLoopContext';
+import type { HomeStackParamList } from '../../../navigation/navigation.types';
+import { useLearnLoop } from '../../../state/LearnLoopProvider';
 import ProgressBar from '../components/ProgressBar';
 
+// Selecting 'Lesson' here makes route.params.lessonId type-safe.
 type Props = NativeStackScreenProps<HomeStackParamList, 'Lesson'>;
 
 export default function LessonScreen({ navigation, route }: Props) {
   // This screen gets the current app state from the shared context.
   // It needs the lesson progress, bookmark status, and the theme colors so it can render correctly.
-  const { colors, progress, bookmarks, toggleBookmark, setProgress } = useLearnLoop();
+  const { colors, lessons, progress, bookmarks, toggleBookmark, setProgress } = useLearnLoop();
 
   // route.params.lessonId was sent from the Home screen when the user tapped a lesson card.
   // This finds the exact lesson object from the lesson list so the right content appears on screen.
-  const lesson = lessons.find((item) => item.id === route.params.lessonId) ?? lessons[0];
+  const lesson = lessons.find((item) => item.id === route.params.lessonId);
+
+  if (!lesson) {
+    return (
+      <SafeAreaView style={[styles.safe, { backgroundColor: colors.surface }]} edges={['top']}>
+        <View style={styles.missingLesson}>
+          <Ionicons name="alert-circle-outline" size={34} color={colors.primary} />
+          <Text style={[styles.missingTitle, { color: colors.text }]}>Lesson not found</Text>
+          <Pressable onPress={() => navigation.goBack()}>
+            <Text style={[styles.backText, { color: colors.primary }]}>Back to lessons</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   // Look up this lesson's progress value. If it does not exist yet, default to 0.
   const lessonProgress = progress[lesson.id] ?? 0;
@@ -175,5 +191,21 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: 15,
     fontWeight: '800',
+  },
+  missingLesson: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+  },
+  missingTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    marginTop: 12,
+  },
+  backText: {
+    fontSize: 14,
+    fontWeight: '800',
+    marginTop: 16,
   },
 });

@@ -1,3 +1,5 @@
+// Theme palettes centralize semantic colors so screens can ask for colors.text
+// or colors.surface instead of repeating raw color values throughout the app.
 export const palette = {
   primary: '#2F6FED',
   primarySoft: '#E7EEFF',
@@ -12,6 +14,8 @@ export const palette = {
 };
 
 export const midnightPalette = {
+  // Spread copies the base palette, then the fields below override dark-mode
+  // colors. Shared colors do not need to be repeated.
   ...palette,
   surface: '#101827',
   card: '#182235',
@@ -21,4 +25,5 @@ export const midnightPalette = {
   primarySoft: '#203663',
 };
 
+// This union is reused by settings and prevents invalid theme names.
 export type ThemeMode = 'light' | 'midnight';
