@@ -4,7 +4,7 @@ This is the living source of truth for LearnLoop's Supabase database,
 authentication, authorization, and client integration. Update it whenever the
 schema, policies, authentication flow, or synchronization behavior changes.
 
-Last updated: 2026-10-31
+Last updated: 2026-11-01
 
 ## Current status
 
@@ -66,9 +66,22 @@ supabase.from('lessons').select('*').order('sort_order');
 
 Each seeded lesson contains five takeaway checkpoints and one final practice
 task. Completing one checkpoint stores approximately 17 percent more progress
-in `user_lesson_state`. Run
-`supabase/seed_lessons.sql` in the dashboard SQL Editor to upsert all six lessons
-without changing existing lesson IDs or breaking saved user state.
+in `user_lesson_state`. Run the numbered scripts in `supabase/` in order to
+create the schema, apply RLS, and upsert all six lessons without changing
+existing lesson IDs or breaking saved user state.
+
+## SQL source files
+
+The complete reproducible database setup is grouped by object type under
+`supabase/`:
+
+1. `schema/01_tables.sql` creates tables, constraints, and indexes.
+2. `schema/02_functions_and_triggers.sql` maintains `updated_at` values.
+3. `security/03_rls_policies.sql` applies grants and ownership policies.
+4. `seed/04_lessons.sql` upserts the shared lesson catalog.
+
+See `supabase/README.md` for execution order and the Dashboard-only email Auth
+configuration.
 
 ### `public.user_lesson_state`
 
@@ -224,6 +237,12 @@ whether the newest server value, newest device value, or a merge wins.
 - Each seeded lesson advances through six persisted checkpoints.
 
 ## Change log
+
+### 2026-11-01
+
+- Added complete, ordered SQL files for schema, triggers, grants, RLS policies,
+  and lesson seed data under `supabase/`.
+- Grouped SQL by schema, security, and seed database object types.
 
 ### 2026-10-31
 

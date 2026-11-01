@@ -38,7 +38,9 @@ moved, renamed, or removed.
 - `src/services/` - authentication and Supabase data operations
 - `src/lib/` - configured third-party clients
 - `src/theme/` - color palettes and theme types
-- `supabase/` - repeatable SQL seed files for the hosted database
+- `supabase/schema/` - tables, constraints, indexes, functions, and triggers
+- `supabase/security/` - grants and Row Level Security policies
+- `supabase/seed/` - shared lesson data
 - `docs/` - architecture and Supabase documentation
 - `submission/` - private instructor handoff files; excluded from Git
 - `.env.example` - safe template for local Supabase configuration
@@ -78,7 +80,8 @@ moved, renamed, or removed.
 
 The hosted LearnLoop project already contains the expanded six-lesson dataset.
 When connecting the app to a different Supabase project, run
-`supabase/seed_lessons.sql` in that project's SQL Editor.
+the numbered scripts in `supabase/` in order. See
+[`supabase/README.md`](supabase/README.md) for the complete setup.
 
 ## Instructor access guide
 
@@ -123,7 +126,7 @@ Recommended assessment walkthrough:
 - **Registration does not open the app:** check the inbox for a Supabase email
   confirmation, then sign in.
 - **No lessons appear:** confirm the app is connected to the supplied LearnLoop
-  project, or apply `supabase/seed_lessons.sql` to the selected project.
+  project, or apply the numbered `supabase/` SQL scripts to the selected project.
 - **Network error:** verify internet access and confirm the Supabase project is
   active.
 
