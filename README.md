@@ -133,7 +133,6 @@ Recommended assessment walkthrough:
 ## Instructor note
 
 - Repository: https://github.com/espyder/GA-app2-LearnLoop
-- Video explanation: https://youtu.be/Utiv9mXKBQ0
 - Supabase project URL and publishable key: delivered separately with the
   submission so local configuration is not committed to source control
 
