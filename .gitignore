@@ -35,6 +35,8 @@ yarn-error.*
 
 # private assignment handoff (contains the publishable project configuration)
 /submission/
+/submission-info.txt
+/submission-info.zip
 
 # typescript
 *.tsbuildinfo
