@@ -50,12 +50,14 @@ export default function LessonScreen({ navigation, route }: Props) {
   const complete = lessonProgress >= 100;
 
   // The takeaway list plus the final practice task form the complete sequence.
-  // Translating the saved percentage into a count shows completed checkpoints.
+  // Progress is saved as a rounded whole percentage. Math.round converts values
+  // such as 33% back to step 2 of 6; Math.floor would incorrectly return step 1
+  // because 33% of 6 is 1.98.
   const lessonSteps = [...lesson.takeaways, lesson.checkpoint];
   const totalSteps = lessonSteps.length;
   const completedSteps = complete
     ? totalSteps
-    : Math.floor((lessonProgress / 100) * totalSteps);
+    : Math.round((lessonProgress / 100) * totalSteps);
   const nextCheckpoint = lessonSteps[completedSteps] ?? lesson.checkpoint;
 
   // Advances exactly one checkpoint and converts the result to a percentage
