@@ -3,6 +3,9 @@
 These scripts are grouped by database object type. For a new Supabase project,
 open **SQL Editor** and run them in numeric order:
 
+For the complete database, authentication, RLS, and application data-flow
+documentation, see [`SUPABASE.md`](SUPABASE.md).
+
 1. `schema/01_tables.sql` creates tables, columns, constraints, and indexes.
 2. `schema/02_functions_and_triggers.sql` creates the timestamp function and
    attaches update triggers.

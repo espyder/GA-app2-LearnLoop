@@ -41,7 +41,7 @@ moved, renamed, or removed.
 - `supabase/schema/` - tables, constraints, indexes, functions, and triggers
 - `supabase/security/` - grants and Row Level Security policies
 - `supabase/seed/` - shared lesson data
-- `docs/` - architecture and Supabase documentation
+- `supabase/SUPABASE.md` - living database, authentication, and RLS documentation
 - `submission/` - private instructor handoff files; excluded from Git
 - `.env.example` - safe template for local Supabase configuration
 - `index.ts` - Expo application entry point
@@ -148,4 +148,4 @@ This project is designed as a learning app prototype and demonstrates:
 ## Backend documentation
 
 The living database, authentication, RLS, and Supabase integration documentation
-is maintained in [docs/SUPABASE.md](docs/SUPABASE.md).
+is maintained in [supabase/SUPABASE.md](supabase/SUPABASE.md).
