@@ -8,6 +8,9 @@ export type Lesson = {
   // A string union prevents unsupported difficulty values at compile time.
   difficulty: 'Beginner' | 'Intermediate';
   summary: string;
+  // Markdown stores the complete teaching material separately from the short
+  // summary and lets the lesson screen render headings, lists, and code blocks.
+  contentMarkdown: string;
   takeaways: string[];
   checkpoint: string;
 };

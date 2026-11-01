@@ -6,6 +6,7 @@ LearnLoop is a React Native learning app built with Expo. The app lets users bro
 
 - Learn screen with lesson cards
 - Lesson detail screen with incremental checkpoint progress
+- Supabase-backed lesson articles with headings, lists, and code examples
 - Bookmark support for saved lessons
 - Progress tracking across the app
 - Theme switching between light and midnight modes
@@ -33,6 +34,7 @@ moved, renamed, or removed.
 - `src/features/auth/` - registration and login interface
 - `src/navigation/` - React Navigation setup and navigation types
 - `src/features/learning/` - lesson screens, learning components, and lesson types
+- `src/features/learning/components/LessonMarkdown.tsx` - annotated lesson-content parser and renderer
 - `src/features/settings/` - settings feature UI
 - `src/state/` - authentication and learning-data providers
 - `src/services/` - authentication and Supabase data operations

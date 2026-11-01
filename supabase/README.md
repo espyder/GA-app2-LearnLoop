@@ -12,6 +12,8 @@ Last updated: 2026-11-01
 - `lessons`, `user_lesson_state`, and `user_preferences` have been created.
 - Row Level Security (RLS) and the initial policies have been applied.
 - The catalog contains six seeded lessons with six checkpoints each.
+- Every seeded lesson includes Markdown teaching content with explanations,
+  examples, key points, and a practice prompt.
 - Email/password authentication is implemented with registration and login.
 - The Expo client dependencies have been installed.
 - `src/lib/supabase.ts` initializes the client and persists its session locally.
@@ -53,6 +55,7 @@ Shared learning content displayed to every user.
 | `duration` | `text` | Display value such as `12 min` |
 | `difficulty` | `text` | `Beginner` or `Intermediate` |
 | `summary` | `text` | Lesson introduction |
+| `content_markdown` | `text` | Full lesson article rendered by the app |
 | `takeaways` | `text[]` | Lesson takeaway list |
 | `checkpoint` | `text` | Next checkpoint label |
 | `sort_order` | `integer` | Controls display order |
@@ -64,11 +67,15 @@ The client should query lessons in this order:
 supabase.from('lessons').select('*').order('sort_order');
 ```
 
-Each seeded lesson contains five takeaway checkpoints and one final practice
-task. Completing one checkpoint stores approximately 17 percent more progress
-in `user_lesson_state`. Run the numbered scripts in `supabase/` in order to
-create the schema, apply RLS, and upsert all six lessons without changing
-existing lesson IDs or breaking saved user state.
+Each seeded lesson contains a Markdown article, five takeaway checkpoints, and
+one final practice task. Completing one checkpoint stores approximately 17
+percent more progress in `user_lesson_state`. Run the numbered scripts in
+`supabase/` in order to create the schema, apply RLS, and upsert all six lessons
+without changing existing lesson IDs or breaking saved user state.
+
+To upgrade an existing LearnLoop database for this feature, rerun
+`schema/01_tables.sql` first and then `seed/04_lessons.sql`. The schema script
+adds `content_markdown` when it is missing, and the seed fills the new column.
 
 ### `public.user_lesson_state`
 
@@ -103,7 +110,8 @@ The complete reproducible database setup is grouped by object type under
 `supabase/`. For a new Supabase project, open **SQL Editor** in the Supabase
 Dashboard and run these files in numeric order:
 
-1. `schema/01_tables.sql` creates tables, constraints, and indexes.
+1. `schema/01_tables.sql` creates tables, constraints, indexes, and safely adds
+   the lesson-content column to an existing database.
 2. `schema/02_functions_and_triggers.sql` maintains `updated_at` values.
 3. `security/03_rls_policies.sql` applies grants and ownership policies.
 4. `seed/04_lessons.sql` upserts the shared lesson catalog.
@@ -215,13 +223,16 @@ UI-facing learning-data layer, and database operations live in
 1. Restore a persisted email/password session.
 2. Display the validated auth form while signed out.
 3. Fetch lessons ordered by `sort_order` after login.
-4. Fetch the current user's lesson state and preferences.
-5. Create the default preferences row when a new user does not have one.
-6. Expose lessons, user state, loading, errors, and retry behavior.
-7. Advance progress one lesson checkpoint at a time.
-8. Keep progress, bookmark, and setting changes optimistic in React state.
-9. Persist each change with a Supabase upsert and roll back failed writes.
-10. End the session from Settings and return to the auth form.
+4. Convert `content_markdown` into the app's `contentMarkdown` lesson field.
+5. Fetch the current user's lesson state and preferences.
+6. Create the default preferences row when a new user does not have one.
+7. Expose lessons, user state, loading, errors, and retry behavior.
+8. Render Markdown lesson content as native headings, lists, paragraphs, and
+   code blocks.
+9. Advance progress one lesson checkpoint at a time.
+10. Keep progress, bookmark, and setting changes optimistic in React state.
+11. Persist each change with a Supabase upsert and roll back failed writes.
+12. End the session from Settings and return to the auth form.
 
 The screens do not import lesson content directly. The shared `Lesson` type
 lives beside the learning feature in
@@ -263,6 +274,9 @@ whether the newest server value, newest device value, or a merge wins.
 
 ### 2026-11-01
 
+- Added full Markdown teaching content for all six lessons.
+- Added the annotated native lesson-content parser and renderer.
+- Added the repeatable `content_markdown` schema upgrade.
 - Added complete, ordered SQL files for schema, triggers, grants, RLS policies,
   and lesson seed data under `supabase/`.
 - Grouped SQL by schema, security, and seed database object types.

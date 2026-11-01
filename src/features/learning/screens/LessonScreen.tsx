@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { HomeStackParamList } from '../../../navigation/navigation.types';
 import { useLearnLoop } from '../../../state/LearnLoopProvider';
+import LessonMarkdown from '../components/LessonMarkdown';
 import ProgressBar from '../components/ProgressBar';
 
 // Selecting 'Lesson' here makes route.params.lessonId type-safe.
@@ -115,6 +116,10 @@ export default function LessonScreen({ navigation, route }: Props) {
             {complete ? 'All checkpoints completed' : `Next: ${nextCheckpoint}`}
           </Text>
         </View>
+
+        {/* Supabase stores the full lesson as Markdown. This component parses
+            the string and renders native headings, paragraphs, lists, and code. */}
+        <LessonMarkdown markdown={lesson.contentMarkdown} colors={colors} />
 
         {/* Each takeaway and the final practice are interactive checkpoints. */}
         <View style={styles.sectionHeadingRow}>

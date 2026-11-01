@@ -25,9 +25,15 @@ create table if not exists public.lessons (
     constraint lessons_difficulty_check
     check (difficulty in ('Beginner', 'Intermediate')),
 
-  -- summary is the introduction. takeaways stores several checkpoint strings
-  -- in one PostgreSQL text array. An empty array is the default.
+  -- summary is the short introduction shown near the lesson title.
   summary text not null,
+
+  -- content_markdown contains the complete teaching material. Markdown keeps
+  -- headings, paragraphs, bullet lists, and code examples in one text value.
+  content_markdown text not null default '',
+
+  -- takeaways stores several checkpoint strings in one PostgreSQL text array.
+  -- An empty array is the default.
   takeaways text[] not null default '{}',
 
   -- The final practice task and the number controlling list order.
@@ -37,6 +43,12 @@ create table if not exists public.lessons (
   -- now() records when Supabase inserts the lesson.
   created_at timestamptz not null default now()
 );
+
+-- CREATE TABLE IF NOT EXISTS does not add new columns to a table that already
+-- exists. This safe migration adds lesson content to deployed LearnLoop
+-- projects when this schema file is run again.
+alter table public.lessons
+  add column if not exists content_markdown text not null default '';
 
 -- Private progress and bookmark data. One row represents one user's state for
 -- one lesson; therefore the primary key combines user_id and lesson_id.

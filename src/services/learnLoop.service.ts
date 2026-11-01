@@ -5,7 +5,13 @@ import { supabase } from '../lib/supabase';
 import type { Settings } from '../state/learnLoop.types';
 import type { ThemeMode } from '../theme/theme';
 
-type LessonRow = Lesson & { sort_order: number };
+// Supabase returns database column names exactly as stored. This row type keeps
+// snake_case database fields at the service boundary before they are converted
+// into the camelCase Lesson model used by React components.
+type LessonRow = Omit<Lesson, 'contentMarkdown'> & {
+  content_markdown: string;
+  sort_order: number;
+};
 type LessonStateRow = { lesson_id: string; progress: number; bookmarked: boolean };
 type PreferencesRow = {
   theme: ThemeMode;
@@ -31,7 +37,7 @@ export async function loadLearnLoopSnapshot(
   const [lessonsResult, stateResult, preferencesResult] = await Promise.all([
     supabase
       .from('lessons')
-      .select('id, title, topic, duration, difficulty, summary, takeaways, checkpoint, sort_order')
+      .select('id, title, topic, duration, difficulty, summary, content_markdown, takeaways, checkpoint, sort_order')
       .order('sort_order'),
     supabase
       .from('user_lesson_state')
@@ -80,7 +86,10 @@ export async function loadLearnLoopSnapshot(
   return {
     // map creates a new array. Destructuring removes the database-only
     // sort_order column before each lesson reaches the UI.
-    lessons: lessonRows.map(({ sort_order: _sortOrder, ...lesson }) => lesson),
+    lessons: lessonRows.map(({ content_markdown, sort_order: _sortOrder, ...lesson }) => ({
+      ...lesson,
+      contentMarkdown: content_markdown,
+    })),
     progress,
     bookmarks,
     settings: {
